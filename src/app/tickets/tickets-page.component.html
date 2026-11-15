@@ -1,0 +1,132 @@
+<a href="#main-content" class="skip-link">Skip to ticket queue</a>
+<header class="app-header">
+  <a class="brand" href="/" aria-label="Northstar service desk"
+    ><span class="brand-mark">N</span> northstar<span class="brand-divider">/</span
+    ><span class="brand-section">Service desk</span></a
+  >
+  <span class="workshop-tag">Angular 22 / RxJS baseline</span>
+  <span class="avatar" aria-label="Signed in as Taylor Brooks">TB</span>
+</header>
+<main id="main-content" tabindex="-1">
+  @if (store.vm$ | async; as vm) {
+    <section class="page-heading">
+      <div>
+        <p class="eyebrow">Customer operations</p>
+        <h1>A little clarity for your queue.</h1>
+        <p class="muted">
+          Prioritize requests, support your customers, and keep your team in sync.
+        </p>
+      </div>
+      <div class="toolbar">
+        <button
+          type="button"
+          class="secondary-button"
+          (click)="demo.toggleOffline()"
+          [attr.aria-pressed]="demo.offline$ | async"
+        >
+          {{ (demo.offline$ | async) ? 'Restore API connection' : 'Simulate API outage' }}
+        </button>
+        <button
+          type="button"
+          class="primary-button"
+          [disabled]="vm.loading || vm.saving"
+          (click)="store.reload()"
+        >
+          Refresh queue
+        </button>
+      </div>
+    </section>
+    @if (demo.offline$ | async) {
+      <div class="banner warning" role="status">
+        Demo API offline. Refresh or save to exercise error handling. Existing data stays visible.
+      </div>
+    }
+    @if (vm.loadError) {
+      <div class="banner error" role="alert">
+        {{ vm.loadError }}
+        <button
+          type="button"
+          class="text-button"
+          [disabled]="vm.loading || vm.saving"
+          (click)="store.reload()"
+        >
+          Retry loading
+        </button>
+      </div>
+    }
+    @if (vm.saveError) {
+      <div class="banner error" role="alert">
+        {{ vm.saveError }} Your draft has been kept; submit it again after restoring the connection.
+      </div>
+    }
+    @if (vm.notice) {
+      <div class="banner success" role="status">
+        {{ vm.notice }} Filters are unchanged, so the ticket may be outside this view.
+      </div>
+    }
+    <app-queue-summary [summary]="vm.summary" />
+    <div class="workspace">
+      <section class="panel queue-panel" [attr.aria-busy]="vm.loading">
+        <header class="panel-heading">
+          <h2>
+            Ticket queue <span class="count">{{ vm.tickets.length }}</span>
+          </h2>
+          <span class="muted">{{
+            vm.loading ? 'Syncing with the API...' : 'All customers / Shared inbox'
+          }}</span>
+        </header>
+        <app-ticket-filters [filters]="vm.filters" (filtersChange)="store.setFilters($event)" />
+        @if (vm.loading) {
+          <div class="loading-bar" role="status">Loading tickets...</div>
+        }
+        @if (!vm.loading || vm.summary.total > 0) {
+          <app-ticket-list
+            [tickets]="vm.tickets"
+            [selectedId]="vm.selected?.id ?? null"
+            [disabled]="vm.saving"
+            [now]="vm.now"
+            (ticketSelected)="store.select($event)"
+          />
+        }
+        <footer class="queue-footer">
+          <span>{{ vm.tickets.length }} of {{ vm.summary.total }} tickets</span
+          ><span>Search is debounced / SLA times are local</span>
+        </footer>
+      </section>
+      <aside class="sidebar" aria-label="Ticket workspace">
+        @if (vm.selected; as ticket) {
+          <app-ticket-detail
+            [ticket]="ticket"
+            [saving]="vm.saving"
+            [disabled]="vm.loading"
+            (saved)="store.update(ticket.id, $event)"
+            (closed)="store.select(null)"
+          />
+        } @else {
+          <section class="panel selection-placeholder">
+            <div class="placeholder-symbol" aria-hidden="true">+</div>
+            <h2>Make room for the details.</h2>
+            <p>Select a ticket to assign it, update its status, or leave a note for your team.</p>
+          </section>
+        }
+        <app-create-ticket
+          [saving]="vm.saving"
+          [disabled]="vm.loading"
+          [resetVersion]="vm.createVersion"
+          (created)="store.create($event)"
+        />
+        <section class="workshop-note">
+          <span class="eyebrow">Built to be migrated</span>
+          <p>
+            Real HTTP boundaries. Observable state. Decorator inputs and outputs. Your Signals
+            journey starts here.
+          </p>
+          <small>Demo data lives in memory and resets when the page reloads.</small>
+        </section>
+      </aside>
+    </div>
+  }
+</main>
+<footer class="app-footer">
+  <span>Northstar / Customer experience, thoughtfully managed.</span><span>Workshop edition</span>
+</footer>

@@ -1,0 +1,86 @@
+<section class="panel detail-panel" aria-labelledby="detail-title">
+  <header class="panel-heading">
+    <span class="eyebrow">{{ ticket.id }} / Ticket details</span>
+    <button type="button" class="text-button" [disabled]="saving" (click)="closed.emit()">
+      Close
+    </button>
+  </header>
+  <h2 id="detail-title">{{ ticket.title }}</h2>
+  <p class="customer-line">
+    {{ ticket.customer }} <span>{{ ticket.email }}</span>
+  </p>
+  <p class="description">{{ ticket.description }}</p>
+  <dl class="ticket-dates">
+    <div>
+      <dt>Received</dt>
+      <dd>{{ ticket.createdAt | date: 'MMM d, HH:mm' }}</dd>
+    </div>
+    <div>
+      <dt>SLA deadline</dt>
+      <dd>{{ ticket.dueAt | date: 'MMM d, HH:mm' }}</dd>
+    </div>
+  </dl>
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <fieldset [disabled]="saving || disabled">
+      <legend class="sr-only">Update {{ ticket.id }}</legend>
+      <div class="form-row">
+        <label
+          >Status
+          <select formControlName="status">
+            @for (status of statuses; track status) {
+              <option [value]="status">{{ status }}</option>
+            }
+          </select>
+        </label>
+        <label
+          >Priority
+          <select formControlName="priority">
+            @for (priority of priorities; track priority) {
+              <option [value]="priority">{{ priority }}</option>
+            }
+          </select>
+        </label>
+      </div>
+      <label
+        >Assigned to
+        <select formControlName="assignee">
+          @for (agent of agents; track agent) {
+            <option [value]="agent">{{ agent }}</option>
+          }
+        </select>
+      </label>
+      <label
+        >Internal note
+        <textarea
+          formControlName="note"
+          rows="3"
+          maxlength="1000"
+          placeholder="Share an update with your team..."
+          aria-describedby="note-help"
+        ></textarea>
+      </label>
+      <small id="note-help" class="muted">Internal only. Up to 1,000 characters.</small>
+      @if (form.controls.note.touched && form.controls.note.invalid) {
+        <p class="field-error">Keep your note under 1,000 characters.</p>
+      }
+      <button
+        type="submit"
+        class="primary-button full-width"
+        [disabled]="form.invalid || !hasChanges"
+      >
+        {{ saving ? 'Saving changes...' : 'Save changes' }}
+      </button>
+    </fieldset>
+  </form>
+  <h3>Activity</h3>
+  <ol class="activity-list">
+    @for (activity of ticket.activity; track activity.id) {
+      <li>
+        <p>{{ activity.message }}</p>
+        <time [attr.datetime]="activity.createdAt">{{
+          activity.createdAt | date: 'MMM d, HH:mm'
+        }}</time>
+      </li>
+    }
+  </ol>
+</section>

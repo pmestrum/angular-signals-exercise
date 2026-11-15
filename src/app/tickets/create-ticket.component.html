@@ -1,0 +1,49 @@
+<details class="panel create-panel">
+  <summary>Create a ticket <span class="muted">+</span></summary>
+  <p class="muted">Log a customer request. New tickets start open and unassigned.</p>
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <fieldset [disabled]="saving || disabled">
+      <legend class="sr-only">New customer ticket</legend>
+      <label
+        >Title
+        <input formControlName="title" maxlength="120" placeholder="A short summary of the issue"
+      /></label>
+      <label
+        >Customer <input formControlName="customer" maxlength="80" placeholder="Company or team"
+      /></label>
+      <label
+        >Contact email
+        <input
+          type="email"
+          formControlName="email"
+          maxlength="254"
+          placeholder="name@company.example"
+      /></label>
+      <label
+        >Priority
+        <select formControlName="priority">
+          @for (priority of priorities; track priority) {
+            <option [value]="priority">{{ priority }}</option>
+          }
+        </select>
+      </label>
+      <label
+        >Description
+        <textarea
+          formControlName="description"
+          rows="4"
+          maxlength="2000"
+          placeholder="What happened? What did the customer expect?"
+        ></textarea>
+      </label>
+      @if (form.touched && form.invalid) {
+        <p role="alert" class="field-error">
+          Complete all fields with non-blank text and a valid email address.
+        </p>
+      }
+      <button type="submit" class="primary-button full-width">
+        {{ saving ? 'Saving...' : 'Create ticket' }}
+      </button>
+    </fieldset>
+  </form>
+</details>
